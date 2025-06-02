@@ -30,7 +30,8 @@ func NewAstrocyte() *Astrocyte {
 func (a *Astrocyte) Update() {
 	elapsed := time.Since(a.LastActivity).Seconds()
 	phase := 2 * math.Pi * CalciumWaveFrequency * elapsed
-	a.CalciumLevel = 0.5 + 0.5*math.Sin(phase)
+	// Увеличиваем амплитуду кальциевых волн
+	a.CalciumLevel = 0.8 + 0.5*math.Sin(phase)
 
 	a.CalciumLevel += rand.Float64()*0.1 - 0.05
 	a.CalciumLevel = math.Max(0.0, math.Min(1.0, a.CalciumLevel))
@@ -40,7 +41,8 @@ func (a *Astrocyte) Update() {
 }
 
 func (a *Astrocyte) TransferEnergy() float64 {
-	transferred := a.EnergyReserve * EnergyTransferRate
+	// Увеличиваем передачу энергии
+	transferred := a.EnergyReserve * 0.9
 	a.EnergyReserve -= transferred
 	return transferred
 }

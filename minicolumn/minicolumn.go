@@ -5,9 +5,9 @@ import (
 )
 
 const (
-	NumNeurons          = 12
-	ActivationThreshold = 0.85
-	DendriteLength      = 8
+	NumNeurons          = 100 // Увеличили с 12 до 100
+	ActivationThreshold = 0.1 // Вместо 0.85
+	DendriteLength      = 50  // Увеличили с 8 до 50
 	PatternSize         = 5
 )
 
