@@ -36,9 +36,7 @@ func (n *Neuron) CalculateActivation(input []complex128, context []float64) floa
 
 	total := 0.0 + 0i
 
-	// Обрабатываем каждый элемент входного паттерна
 	for i := 0; i < len(input) && i < PatternSize; i++ {
-		// Применяем контекстную модуляцию
 		contextFactor := 1.0
 		if i < len(context) && i < len(n.Context) {
 			contextFactor = 1 + context[i]*n.Context[i]
@@ -46,13 +44,13 @@ func (n *Neuron) CalculateActivation(input []complex128, context []float64) floa
 
 		modulated := input[i] * complex(contextFactor, 0)
 
-		// Обрабатываем каждую дендритную ветвь
 		for j := 0; j < DendriteLength && j < len(n.Dendrites); j++ {
-			total += modulated * cmplx.Conj(n.Dendrites[j])
+			// Используем скалярное произведение вместо Conj
+			total += modulated * n.Dendrites[j]
 		}
 	}
 
-	// Нормализуем и вычисляем активацию
+	// Убираем квадрат и улучшаем нормализацию
 	magnitude := cmplx.Abs(total) / float64(len(input)*DendriteLength)
-	return math.Pow(magnitude, 2)
+	return magnitude
 }

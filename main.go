@@ -7,7 +7,6 @@ import (
 
 	"github.com/aboutbrain/redozubov-model/cortex"
 	"github.com/aboutbrain/redozubov-model/learning"
-	"github.com/aboutbrain/redozubov-model/utils"
 )
 
 func main() {
@@ -16,8 +15,24 @@ func main() {
 	// Создаем кору 3x3
 	cortex := cortex.NewCortex(3, 3)
 
-	// Генерируем входные данные
-	input := utils.GenerateInputTensor(3, 3)
+	// Фиксированные тестовые данные вместо случайных
+	input := [][][]complex128{
+		{
+			{complex(5, 2), complex(3, 4), complex(1, 6), complex(7, 1), complex(2, 5)},
+			{complex(4, 3), complex(6, 2), complex(2, 7), complex(5, 4), complex(3, 6)},
+			{complex(3, 5), complex(2, 6), complex(4, 3), complex(6, 2), complex(5, 4)},
+		},
+		{
+			{complex(6, 1), complex(2, 7), complex(5, 3), complex(3, 5), complex(4, 4)},
+			{complex(1, 8), complex(7, 2), complex(3, 6), complex(4, 5), complex(6, 3)},
+			{complex(2, 7), complex(5, 4), complex(6, 3), complex(1, 8), complex(7, 2)},
+		},
+		{
+			{complex(7, 3), complex(4, 5), complex(2, 8), complex(6, 4), complex(3, 7)},
+			{complex(3, 6), complex(1, 9), complex(7, 3), complex(2, 8), complex(5, 5)},
+			{complex(4, 7), complex(6, 4), complex(3, 7), complex(5, 5), complex(1, 9)},
+		},
+	}
 
 	for step := 0; step < 5; step++ {
 		fmt.Printf("\n=== Шаг %d ===\n", step)

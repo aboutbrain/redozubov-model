@@ -1,22 +1,16 @@
 package utils
 
 import (
-	"github.com/aboutbrain/redozubov-model/config"
-	"math"
+	"github.com/aboutbrain/redozubov-model/minicolumn"
 	"math/rand"
 )
 
 func GeneratePattern() []complex128 {
-	pattern := make([]complex128, config.PatternSize)
+	pattern := make([]complex128, minicolumn.PatternSize)
 	for i := range pattern {
-		real := rand.NormFloat64()
-		imag := rand.NormFloat64()
-		// Нормализуем, чтобы не было слишком больших значений
-		magnitude := math.Sqrt(real*real + imag*imag)
-		if magnitude > 1e-5 {
-			real /= magnitude
-			imag /= magnitude
-		}
+		// Увеличиваем амплитуду в 10 раз
+		real := rand.NormFloat64() * 10
+		imag := rand.NormFloat64() * 10
 		pattern[i] = complex(real, imag)
 	}
 	return pattern
