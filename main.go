@@ -14,10 +14,10 @@ import (
 
 // Добавляем функцию логирования состояния коры
 func printCortexState(c *cortex.Cortex) {
-	fmt.Println("\nСостояние коры:")
+	fmt.Println("\nТекущее состояние коры:")
 	for i, row := range c.Columns {
 		for j, col := range row {
-			fmt.Printf("  Колонка[%d][%d]: активирована=%t, уровень активации=%.4f\n",
+			fmt.Printf("  Колонка[%d][%d]: активирована=%t, уровень=%.4f\n",
 				i, j, col.Activated, col.Activation)
 		}
 	}
@@ -28,17 +28,28 @@ func main() {
 	rand.Seed(time.Now().UnixNano())
 
 	fmt.Println("=== Инициализация модели коры ===")
-	fmt.Printf("Размер паттерна: %d, нейронов в колонке: %d, порог активации: %.2f\n",
+	fmt.Printf("Параметры: размер паттерна=%d, нейронов в колонке=%d, порог активации=%.2f\n",
 		config.PatternSize, config.NumNeurons, config.ActivationThreshold)
 
-	cortex := cortex.NewCortex(3, 3)
+	cortex := cortex.NewCortex(2, 2) // Уменьшаем размер для отладки
 
 	fmt.Println("\nГенерация входных данных...")
-	input := utils.GenerateInputTensor(3, 3)
+	input := utils.GenerateInputTensor(2, 2)
 
 	fmt.Println("\n=== Первый проход обработки ===")
 	cortex.ProcessInput(input)
 	printCortexState(cortex)
+
+	fmt.Println("\nПроверка нейронов в колонках:")
+	for i, row := range cortex.Columns {
+		for j, col := range row {
+			fmt.Printf("Колонка[%d][%d]:\n", i, j)
+			for nIdx, neuron := range col.Neurons {
+				activation := neuron.CalculateActivation(input[i][j], cortex.GlobalContext)
+				fmt.Printf("  Нейрон %d: активация=%.4f\n", nIdx, activation)
+			}
+		}
+	}
 
 	fmt.Println("\nПрименяем обучение...")
 	applyLearning(cortex, input, cortex.GlobalContext)
@@ -59,20 +70,6 @@ func main() {
 	fmt.Println("\n=== Повторный проход после обучения ===")
 	cortex.ProcessInput(input)
 	printCortexState(cortex)
-
-	// Добавляем детализацию по активированным колонкам
-	fmt.Println("\nДетали активированных колонок:")
-	for i, row := range cortex.Columns {
-		for j, col := range row {
-			if col.Activated {
-				fmt.Printf("Колонка[%d][%d]:\n", i, j)
-				for n, neuron := range col.Neurons {
-					activation := neuron.CalculateActivation(input[i][j], cortex.GlobalContext)
-					fmt.Printf("  Нейрон %d: активация=%.4f\n", n, activation)
-				}
-			}
-		}
-	}
 }
 
 func applyLearning(c *cortex.Cortex, input [][][]complex128, globalContext []float64) {

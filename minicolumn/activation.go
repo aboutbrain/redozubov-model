@@ -1,8 +1,6 @@
 package minicolumn
 
-import (
-	"math/cmplx"
-)
+import "math/cmplx"
 
 func ActivationFunction(
 	input []complex128,
