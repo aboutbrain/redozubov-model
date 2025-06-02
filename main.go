@@ -6,47 +6,73 @@ import (
 	"math/rand"
 	"time"
 
+	"github.com/aboutbrain/redozubov-model/config"
 	"github.com/aboutbrain/redozubov-model/cortex"
 	"github.com/aboutbrain/redozubov-model/learning"
 	"github.com/aboutbrain/redozubov-model/utils"
 )
 
+// Добавляем функцию логирования состояния коры
+func printCortexState(c *cortex.Cortex) {
+	fmt.Println("\nСостояние коры:")
+	for i, row := range c.Columns {
+		for j, col := range row {
+			fmt.Printf("  Колонка[%d][%d]: активирована=%t, уровень активации=%.4f\n",
+				i, j, col.Activated, col.Activation)
+		}
+	}
+	fmt.Printf("Глобальный контекст: %.4f\n", c.GlobalContext)
+}
+
 func main() {
 	rand.Seed(time.Now().UnixNano())
 
+	fmt.Println("=== Инициализация модели коры ===")
+	fmt.Printf("Размер паттерна: %d, нейронов в колонке: %d, порог активации: %.2f\n",
+		config.PatternSize, config.NumNeurons, config.ActivationThreshold)
+
 	cortex := cortex.NewCortex(3, 3)
+
+	fmt.Println("\nГенерация входных данных...")
 	input := utils.GenerateInputTensor(3, 3)
 
-	fmt.Println("=== Первый проход ===")
+	fmt.Println("\n=== Первый проход обработки ===")
 	cortex.ProcessInput(input)
 	printCortexState(cortex)
 
+	fmt.Println("\nПрименяем обучение...")
 	applyLearning(cortex, input, cortex.GlobalContext)
 
 	fmt.Println("\nПрименяем дофаминовую модуляцию...")
-	for _, row := range cortex.Columns {
-		for _, col := range row {
+	for i, row := range cortex.Columns {
+		for j, col := range row {
 			if col.Activated {
-				learning.ApplyDopamine(col, 1.2)
+				fmt.Printf("  Колонка[%d][%d] получает подкрепление\n", i, j)
+				learning.ApplyDopamine(col, 1.5)
 			}
 		}
 	}
 
-	fmt.Println("Консолидация памяти...")
+	fmt.Println("\nКонсолидация памяти...")
 	consolidateMemory(cortex)
 
-	fmt.Println("\n=== После обучения ===")
+	fmt.Println("\n=== Повторный проход после обучения ===")
 	cortex.ProcessInput(input)
 	printCortexState(cortex)
-}
 
-func printCortexState(c *cortex.Cortex) {
-	for i, row := range c.Columns {
+	// Добавляем детализацию по активированным колонкам
+	fmt.Println("\nДетали активированных колонок:")
+	for i, row := range cortex.Columns {
 		for j, col := range row {
-			fmt.Printf("Колонка[%d][%d]: активирована=%t, уровень=%.2f\n", i, j, col.Activated, col.Activation)
+			if col.Activated {
+				fmt.Printf("Колонка[%d][%d]:\n", i, j)
+				for n, neuron := range col.Neurons {
+					activation := neuron.CalculateActivation(input[i][j], cortex.GlobalContext)
+					fmt.Printf("  Нейрон %d: активация=%.4f\n", n, activation)
+				}
+			}
 		}
 	}
-	fmt.Printf("Глобальный контекст: %.2f\n", c.GlobalContext)
 }
 
 func applyLearning(c *cortex.Cortex, input [][][]complex128, globalContext []float64) {

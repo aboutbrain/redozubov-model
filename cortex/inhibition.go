@@ -2,29 +2,31 @@ package cortex
 
 import (
 	"github.com/aboutbrain/redozubov-model/config"
-	"math"
+	"github.com/aboutbrain/redozubov-model/minicolumn"
 )
 
-// LateralInhibition применяет конкурентное торможение в слое коры
 func (c *Cortex) LateralInhibition() {
-	for i, row := range c.Columns {
-		for j, col := range row {
-			if col.Activation > 0.7 {
-				// Подавление соседних колонок
-				for di := -1; di <= 1; di++ {
-					for dj := -1; dj <= 1; dj++ {
-						ni, nj := i+di, j+dj
-						if ni >= 0 && ni < len(c.Columns) &&
-							nj >= 0 && nj < len(row) &&
-							!(di == 0 && dj == 0) {
+	maxActivation := 0.0
+	var maxCol *minicolumn.Minicolumn
 
-							// Уменьшаем активацию соседей
-							neighbor := c.Columns[ni][nj]
-							neighbor.Activation *= math.Exp(-float64(di*di + dj*dj))
-							if neighbor.Activation < config.ActivationThreshold {
-								neighbor.Activated = false
-							}
-						}
+	// Находим наиболее активную колонку
+	for _, row := range c.Columns {
+		for _, col := range row {
+			if col.Activation > maxActivation {
+				maxActivation = col.Activation
+				maxCol = col
+			}
+		}
+	}
+
+	// Применяем торможение
+	if maxCol != nil && maxCol.Activation > 0.5 {
+		for _, row := range c.Columns {
+			for _, col := range row {
+				if col != maxCol {
+					col.Activation *= 0.2 // Ослабляем соседей
+					if col.Activation < config.ActivationThreshold {
+						col.Activated = false
 					}
 				}
 			}

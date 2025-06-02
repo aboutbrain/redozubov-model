@@ -27,6 +27,7 @@ func (mc *Minicolumn) ProcessPattern(input []complex128, context []float64) {
 	mc.Activated = false
 
 	for _, neuron := range mc.Neurons {
+		// Добавляем вызов функции активации
 		activation := neuron.CalculateActivation(input, context)
 		if activation > maxActivation {
 			maxActivation = activation

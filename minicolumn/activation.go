@@ -1,8 +1,9 @@
 package minicolumn
 
-import "math/cmplx"
+import (
+	"math/cmplx"
+)
 
-// ActivationFunction вычисляет уровень активации на основе волновой интерференции
 func ActivationFunction(
 	input []complex128,
 	context []float64,
@@ -11,17 +12,12 @@ func ActivationFunction(
 ) float64 {
 	total := 0.0 + 0i
 
-	for i := range input {
-		// Модуляция входного сигнала контекстом
-		modulated := input[i] * complex(1+context[i]*neuronContext[i], 0)
-
-		// Интерференция с дендритными весами
-		for j := 0; j < len(dendrites); j++ {
-			total += modulated * cmplx.Conj(dendrites[j])
-		}
+	// Упрощаем вычисления - используем только первые dendriteLength входов
+	for i := 0; i < len(dendrites) && i < len(input); i++ {
+		modulation := 3.0 + 5.0*context[i]*neuronContext[i]
+		modulated := input[i] * complex(modulation, 0)
+		total += modulated * cmplx.Conj(dendrites[i])
 	}
 
-	// Нормализация и вычисление энергии активации
-	magnitude := cmplx.Abs(total) / float64(len(input)*len(dendrites))
-	return magnitude * magnitude
+	return cmplx.Abs(total) / float64(len(dendrites))
 }

@@ -5,7 +5,6 @@ import (
 	"math/rand"
 
 	"github.com/aboutbrain/redozubov-model/config"
-	"github.com/aboutbrain/redozubov-model/utils"
 )
 
 type Neuron struct {
@@ -21,18 +20,21 @@ func NewNeuron() *Neuron {
 
 	for i := range n.Dendrites {
 		phase := rand.Float64() * 2 * math.Pi
-		n.Dendrites[i] = complex(rand.Float64()*0.5, math.Sin(phase))
+		amplitude := 0.8 + rand.Float64()*0.4
+		n.Dendrites[i] = complex(
+			amplitude*math.Cos(phase),
+			amplitude*math.Sin(phase),
+		)
 	}
 
 	for i := range n.Context {
-		n.Context[i] = rand.NormFloat64() * 0.3
+		n.Context[i] = 0.5*rand.NormFloat64() + 0.1
 	}
-
-	utils.ComplexNorm(n.Dendrites)
 
 	return n
 }
 
+// Добавляем отсутствующий метод CalculateActivation
 func (n *Neuron) CalculateActivation(input []complex128, context []float64) float64 {
 	return ActivationFunction(input, context, n.Dendrites, n.Context)
 }
