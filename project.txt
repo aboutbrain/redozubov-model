@@ -1,0 +1,18 @@
+redozubov-model/
+├── config/
+│   └── config.go             # Общие константы
+├── minicolumn/
+│   ├── minicolumn.go         # Базовая модель миниколонки
+│   ├── neuron.go             # Реализация нейрона
+│   └── activation.go         # Функции активации
+├── cortex/
+│   ├── cortex.go             # Иерархия миниколонок
+│   └── inhibition.go         # Механизмы конкурентного торможения
+├── learning/
+│   ├── hebbian.go            # Обучение по Хеббу
+│   ├── neuromodulation.go    # Нейромодуляция (дофамин)
+│   └── consolidation.go      # Консолидация памяти
+├── utils/
+│   ├── pattern.go            # Генерация паттернов
+│   └── complex_math.go       # Математические операции
+└── main.go                   # Пример использования
