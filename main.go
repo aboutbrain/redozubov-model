@@ -2,82 +2,70 @@ package main
 
 import (
 	"fmt"
-	"math"
 	"math/rand"
 	"time"
 
-	"github.com/aboutbrain/redozubov-model/config"
 	"github.com/aboutbrain/redozubov-model/cortex"
 	"github.com/aboutbrain/redozubov-model/learning"
 	"github.com/aboutbrain/redozubov-model/utils"
 )
 
-// Добавляем функцию логирования состояния коры
-func printCortexState(c *cortex.Cortex) {
-	fmt.Println("\nТекущее состояние коры:")
-	for i, row := range c.Columns {
-		for j, col := range row {
-			fmt.Printf("  Колонка[%d][%d]: активирована=%t, уровень=%.4f\n",
-				i, j, col.Activated, col.Activation)
-		}
-	}
-	fmt.Printf("Глобальный контекст: %.4f\n", c.GlobalContext)
-}
-
 func main() {
 	rand.Seed(time.Now().UnixNano())
 
-	fmt.Println("=== Инициализация модели коры ===")
-	fmt.Printf("Параметры: размер паттерна=%d, нейронов в колонке=%d, порог активации=%.2f\n",
-		config.PatternSize, config.NumNeurons, config.ActivationThreshold)
+	// Создаем кору 3x3
+	cortex := cortex.NewCortex(3, 3)
 
-	cortex := cortex.NewCortex(2, 2) // Уменьшаем размер для отладки
+	// Генерируем входные данные
+	input := utils.GenerateInputTensor(3, 3)
 
-	fmt.Println("\nГенерация входных данных...")
-	input := utils.GenerateInputTensor(2, 2)
+	for step := 0; step < 5; step++ {
+		fmt.Printf("\n=== Шаг %d ===\n", step)
 
-	fmt.Println("\n=== Первый проход обработки ===")
-	cortex.ProcessInput(input)
-	printCortexState(cortex)
+		// Обновляем астроциты
+		cortex.UpdateAstrocytes()
 
-	fmt.Println("\nПроверка нейронов в колонках:")
-	for i, row := range cortex.Columns {
-		for j, col := range row {
-			fmt.Printf("Колонка[%d][%d]:\n", i, j)
-			for nIdx, neuron := range col.Neurons {
-				activation := neuron.CalculateActivation(input[i][j], cortex.GlobalContext)
-				fmt.Printf("  Нейрон %d: активация=%.4f\n", nIdx, activation)
+		// Обрабатываем вход
+		cortex.ProcessInput(input)
+
+		// Выводим состояние коры
+		printCortexState(cortex)
+
+		// Применяем обучение
+		applyLearning(cortex, input)
+
+		// Применяем дофаминовую модуляцию
+		fmt.Println("\nПрименяем дофаминовую модуляцию...")
+		for _, row := range cortex.Columns {
+			for _, col := range row {
+				if col.Activated {
+					learning.ApplyDopamine(col, 1.2)
+				}
 			}
 		}
+
+		// Консолидация памяти
+		fmt.Println("Консолидация памяти...")
+		consolidateMemory(cortex)
 	}
-
-	fmt.Println("\nПрименяем обучение...")
-	applyLearning(cortex, input, cortex.GlobalContext)
-
-	fmt.Println("\nПрименяем дофаминовую модуляцию...")
-	for i, row := range cortex.Columns {
-		for j, col := range row {
-			if col.Activated {
-				fmt.Printf("  Колонка[%d][%d] получает подкрепление\n", i, j)
-				learning.ApplyDopamine(col, 1.5)
-			}
-		}
-	}
-
-	fmt.Println("\nКонсолидация памяти...")
-	consolidateMemory(cortex)
-
-	fmt.Println("\n=== Повторный проход после обучения ===")
-	cortex.ProcessInput(input)
-	printCortexState(cortex)
 }
 
-func applyLearning(c *cortex.Cortex, input [][][]complex128, globalContext []float64) {
+func printCortexState(c *cortex.Cortex) {
+	for i, row := range c.Columns {
+		for j, col := range row {
+			fmt.Printf("Колонка[%d][%d]: активирована=%t, уровень=%.2f, энергия=%.2f\n",
+				i, j, col.Activated, col.Activation, col.EnergyLevel)
+		}
+	}
+}
+
+func applyLearning(c *cortex.Cortex, input [][][]complex128) {
 	for i, row := range c.Columns {
 		for j, col := range row {
 			if col.Activated && i < len(input) && j < len(input[i]) {
+				// Убрали создание fullContext - теперь используем только GlobalContext
 				for _, neuron := range col.Neurons {
-					learning.ApplyHebbianLearning(neuron, input[i][j], globalContext)
+					learning.ApplyHebbianLearning(neuron, input[i][j], c.GlobalContext)
 				}
 			}
 		}
@@ -90,17 +78,6 @@ func consolidateMemory(c *cortex.Cortex) {
 			for _, neuron := range col.Neurons {
 				learning.Consolidate(neuron)
 			}
-		}
-	}
-
-	sum := 0.0
-	for _, val := range c.GlobalContext {
-		sum += val * val
-	}
-	sum = math.Sqrt(sum)
-	if sum > 0 {
-		for i := range c.GlobalContext {
-			c.GlobalContext[i] /= sum
 		}
 	}
 }

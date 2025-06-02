@@ -1,4 +1,8 @@
 redozubov-model/
+└── astrocyte/
+    ├── astrocyte.go         # Модель астроцита
+    ├── calcium_wave.go      # Кальциевая сигнализация
+    └── energy_transfer.go   # Метаболическая поддержка
 ├── config/
 │   └── config.go             # Общие константы
 ├── minicolumn/
