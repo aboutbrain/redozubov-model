@@ -13,8 +13,8 @@ func ApplyHebbianLearning(neuron *minicolumn.Neuron, input []complex128, context
 				contextFactor := 1 + context[j]*neuron.Context[j]
 				modulated := inVal * complex(contextFactor, 0)
 
-				// Усиленное обучение
-				neuron.Dendrites[i] += modulated * complex(LearningRate, 0)
+				// Уменьшаем влияние обучения
+				neuron.Dendrites[i] += modulated * complex(LearningRate*0.5, 0)
 			}
 		}
 	}

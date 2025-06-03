@@ -101,6 +101,16 @@ func main() {
 	fmt.Printf("\nИтого: активаций=%d, средняя=%.1f на шаг\n",
 		totalActivations, float64(totalActivations)/20)
 
+	for step := 0; step < 20; step++ {
+		// ... обработка ...
+
+		// Каждые 5 шагов добавляем цикл отдыха
+		if step%5 == 4 {
+			fmt.Println("\n=== Цикл отдыха ===")
+			cortex.RestCycle()
+			cortex.UpdateAstrocytes()
+		}
+	}
 }
 
 func printCortexState(c *cortex.Cortex) {

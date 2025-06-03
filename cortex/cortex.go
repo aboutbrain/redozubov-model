@@ -75,3 +75,11 @@ func (c *Cortex) ApplyAttention(focus [][]float64) {
 		}
 	}
 }
+
+func (c *Cortex) RestCycle() {
+	for _, row := range c.Columns {
+		for _, col := range row {
+			col.Rest()
+		}
+	}
+}

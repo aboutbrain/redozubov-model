@@ -2,6 +2,7 @@ package minicolumn
 
 import (
 	"github.com/aboutbrain/redozubov-model/types"
+	"math"
 )
 
 const (
@@ -33,12 +34,17 @@ func NewMinicolumn(astro types.AstrocyteInterface) *Minicolumn {
 	return mc
 }
 
+// Динамический порог активации
+func (mc *Minicolumn) ActivationThreshold() float64 {
+	baseThreshold := 0.7
+	energyFactor := 0.3 * (1.0 - mc.EnergyLevel)
+	return baseThreshold + energyFactor
+}
+
 func (mc *Minicolumn) ProcessPattern(input []complex128, context []float64) {
-	// Проверяем наличие астроцита и получаем энергию
-	if mc.Astrocyte != nil {
-		if mc.EnergyLevel < 0.3 {
-			mc.EnergyLevel += mc.Astrocyte.TransferEnergy()
-		}
+	// Увеличиваем базовое восстановление энергии
+	if mc.Astrocyte != nil && mc.EnergyLevel < 0.5 {
+		mc.EnergyLevel += mc.Astrocyte.TransferEnergy()
 	}
 
 	// Вычисляем кальциевую модуляцию
@@ -51,13 +57,14 @@ func (mc *Minicolumn) ProcessPattern(input []complex128, context []float64) {
 	mc.Activated = false
 
 	// Обрабатываем каждый нейрон в миниколонке
+	threshold := mc.ActivationThreshold()
 	for _, neuron := range mc.Neurons {
 		activation := neuron.CalculateActivation(input, context) * calciumMod
 
 		if activation > maxActivation {
 			maxActivation = activation
 		}
-		if activation >= ActivationThreshold {
+		if activation >= threshold { // Используем динамический порог
 			mc.Activated = true
 		}
 	}
@@ -72,14 +79,19 @@ func (mc *Minicolumn) ProcessPattern(input []complex128, context []float64) {
 		}
 	}
 
-	// Увеличиваем расход энергии при активации
+	// Уменьшаем расход энергии
 	if mc.Activated {
-		mc.EnergyLevel -= 0.15
+		mc.EnergyLevel -= 0.08 // Было 0.15
 	} else {
-		mc.EnergyLevel -= 0.02
+		mc.EnergyLevel -= 0.01 // Было 0.02
 	}
 
 	if mc.EnergyLevel < 0 {
 		mc.EnergyLevel = 0
 	}
+}
+
+func (mc *Minicolumn) Rest() {
+	// Пассивное восстановление энергии
+	mc.EnergyLevel = math.Min(1.0, mc.EnergyLevel+0.1)
 }

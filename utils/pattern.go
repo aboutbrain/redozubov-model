@@ -2,15 +2,17 @@ package utils
 
 import (
 	"github.com/aboutbrain/redozubov-model/minicolumn"
+	"math"
 	"math/rand"
 )
 
 func GeneratePattern() []complex128 {
 	pattern := make([]complex128, minicolumn.PatternSize)
 	for i := range pattern {
-		// Увеличиваем амплитуду в 10 раз
-		real := rand.NormFloat64() * 10
-		imag := rand.NormFloat64() * 10
+		// Создаем более структурированные паттерны
+		phase := float64(i) * math.Pi / float64(minicolumn.PatternSize)
+		real := math.Cos(phase) + rand.NormFloat64()*0.2
+		imag := math.Sin(phase) + rand.NormFloat64()*0.2
 		pattern[i] = complex(real, imag)
 	}
 	return pattern

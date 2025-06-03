@@ -39,13 +39,13 @@ func (a *Astrocyte) Update() {
 	a.EnergyReserve = math.Min(1.0, a.EnergyReserve+0.01)
 	a.LastActivity = time.Now()
 
-	// Медленнее восстанавливаем энергию
-	a.EnergyReserve = math.Min(1.0, a.EnergyReserve+0.002)
+	// Увеличиваем восстановление энергии
+	a.EnergyReserve = math.Min(1.0, a.EnergyReserve+0.01) // Было 0.002
 }
 
 func (a *Astrocyte) TransferEnergy() float64 {
-	// Передаем меньше энергии
-	transferred := a.EnergyReserve * 0.4
+	// Увеличиваем передачу энергии
+	transferred := math.Min(0.5, a.EnergyReserve*0.8) // Было 0.4
 	a.EnergyReserve -= transferred
 	return transferred
 }
