@@ -9,10 +9,10 @@ import (
 func GeneratePattern() []complex128 {
 	pattern := make([]complex128, minicolumn.PatternSize)
 	for i := range pattern {
-		// Создаем более структурированные паттерны
-		phase := float64(i) * math.Pi / float64(minicolumn.PatternSize)
-		real := math.Cos(phase) + rand.NormFloat64()*0.2
-		imag := math.Sin(phase) + rand.NormFloat64()*0.2
+		// Более структурированные паттерны
+		phase := float64(i) * 2 * math.Pi / float64(minicolumn.PatternSize)
+		real := math.Cos(phase) + rand.NormFloat64()*0.1
+		imag := math.Sin(phase) + rand.NormFloat64()*0.1
 		pattern[i] = complex(real, imag)
 	}
 	return pattern
