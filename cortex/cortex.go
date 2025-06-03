@@ -64,3 +64,14 @@ func (c *Cortex) ProcessInput(input [][][]complex128) {
 		}
 	}
 }
+
+func (c *Cortex) ApplyAttention(focus [][]float64) {
+	for i, row := range c.Columns {
+		for j, col := range row {
+			if i < len(focus) && j < len(focus[i]) {
+				// Усиливаем активацию в фокусе внимания
+				col.Activation *= 1.0 + focus[i][j]
+			}
+		}
+	}
+}

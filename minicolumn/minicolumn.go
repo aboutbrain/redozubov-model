@@ -5,9 +5,9 @@ import (
 )
 
 const (
-	NumNeurons          = 100 // Увеличили с 12 до 100
-	ActivationThreshold = 0.1 // Вместо 0.85
-	DendriteLength      = 50  // Увеличили с 8 до 50
+	NumNeurons          = 100  // Увеличили с 12 до 100
+	ActivationThreshold = 0.85 // Возвращаем оригинальный порог
+	DendriteLength      = 50   // Увеличили с 8 до 50
 	PatternSize         = 5
 )
 
@@ -70,5 +70,16 @@ func (mc *Minicolumn) ProcessPattern(input []complex128, context []float64) {
 		if mc.EnergyLevel < 0 {
 			mc.EnergyLevel = 0
 		}
+	}
+
+	// Увеличиваем расход энергии при активации
+	if mc.Activated {
+		mc.EnergyLevel -= 0.15
+	} else {
+		mc.EnergyLevel -= 0.02
+	}
+
+	if mc.EnergyLevel < 0 {
+		mc.EnergyLevel = 0
 	}
 }

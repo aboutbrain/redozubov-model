@@ -52,5 +52,8 @@ func (n *Neuron) CalculateActivation(input []complex128, context []float64) floa
 
 	// Убираем квадрат и улучшаем нормализацию
 	magnitude := cmplx.Abs(total) / float64(len(input)*DendriteLength)
-	return magnitude
+
+	// Нормализуем активацию с помощью сигмоиды
+	normalized := 1 / (1 + math.Exp(-magnitude/5.0))
+	return normalized
 }

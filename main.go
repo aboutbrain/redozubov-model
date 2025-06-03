@@ -63,6 +63,44 @@ func main() {
 		fmt.Println("Консолидация памяти...")
 		consolidateMemory(cortex)
 	}
+
+	// Статистика
+	totalActivations := 0
+	maxActivation := 0.0
+
+	for step := 0; step < 20; step++ {
+		// ... существующий код ...
+
+		// Сбор статистики
+		stepActivations := 0
+		for _, row := range cortex.Columns {
+			for _, col := range row {
+				if col.Activated {
+					stepActivations++
+					if col.Activation > maxActivation {
+						maxActivation = col.Activation
+					}
+				}
+			}
+		}
+		totalActivations += stepActivations
+
+		fmt.Printf("Шаг %d: активировано %d/%d колонок (макс. активация: %.2f)\n",
+			step, stepActivations, len(cortex.Columns)*len(cortex.Columns[0]), maxActivation)
+
+		// Визуализация энергии
+		for _, row := range cortex.Columns {
+			for _, col := range row {
+				energyLevel := int(col.EnergyLevel * 10)
+				fmt.Printf("%d ", energyLevel)
+			}
+			fmt.Println()
+		}
+	}
+
+	fmt.Printf("\nИтого: активаций=%d, средняя=%.1f на шаг\n",
+		totalActivations, float64(totalActivations)/20)
+
 }
 
 func printCortexState(c *cortex.Cortex) {
