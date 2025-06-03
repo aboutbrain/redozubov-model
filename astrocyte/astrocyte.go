@@ -50,6 +50,11 @@ func (a *Astrocyte) TransferEnergy() float64 {
 	return transferred
 }
 
+func (a *Astrocyte) Rest() {
+	a.EnergyReserve = 1.0
+	a.CalciumLevel = 0.5
+}
+
 func (a *Astrocyte) GetCalciumLevel() float64 {
 	return a.CalciumLevel
 }

@@ -2,12 +2,25 @@ package main
 
 import (
 	"fmt"
+	"math"
 	"math/rand"
 	"time"
 
 	"github.com/aboutbrain/redozubov-model/cortex"
 	"github.com/aboutbrain/redozubov-model/learning"
+	"github.com/aboutbrain/redozubov-model/utils"
 )
+
+const (
+	InitialLearningRate = 0.3
+	MinLearningRate     = 0.1
+)
+
+// Динамическая регулировка скорости обучения
+func adjustLearningRate(step int) float64 {
+	// Экспоненциальное затухание скорости обучения
+	return math.Max(MinLearningRate, InitialLearningRate*math.Exp(-float64(step)/20))
+}
 
 func main() {
 	rand.Seed(time.Now().UnixNano())
@@ -15,26 +28,14 @@ func main() {
 	// Создаем кору 3x3
 	cortex := cortex.NewCortex(3, 3)
 
-	// Фиксированные тестовые данные вместо случайных
-	input := [][][]complex128{
-		{
-			{complex(5, 2), complex(3, 4), complex(1, 6), complex(7, 1), complex(2, 5)},
-			{complex(4, 3), complex(6, 2), complex(2, 7), complex(5, 4), complex(3, 6)},
-			{complex(3, 5), complex(2, 6), complex(4, 3), complex(6, 2), complex(5, 4)},
-		},
-		{
-			{complex(6, 1), complex(2, 7), complex(5, 3), complex(3, 5), complex(4, 4)},
-			{complex(1, 8), complex(7, 2), complex(3, 6), complex(4, 5), complex(6, 3)},
-			{complex(2, 7), complex(5, 4), complex(6, 3), complex(1, 8), complex(7, 2)},
-		},
-		{
-			{complex(7, 3), complex(4, 5), complex(2, 8), complex(6, 4), complex(3, 7)},
-			{complex(3, 6), complex(1, 9), complex(7, 3), complex(2, 8), complex(5, 5)},
-			{complex(4, 7), complex(6, 4), complex(3, 7), complex(5, 5), complex(1, 9)},
-		},
-	}
+	// Генерируем входные данные
+	input := utils.GenerateInputTensor(3, 3)
 
-	for step := 0; step < 5; step++ {
+	// Статистика
+	totalActivations := 0
+	maxActivation := 0.0
+
+	for step := 0; step < 20; step++ {
 		fmt.Printf("\n=== Шаг %d ===\n", step)
 
 		// Обновляем астроциты
@@ -46,8 +47,9 @@ func main() {
 		// Выводим состояние коры
 		printCortexState(cortex)
 
-		// Применяем обучение
-		applyLearning(cortex, input)
+		// Применяем обучение с динамической скоростью
+		currentLR := adjustLearningRate(step)
+		applyLearning(cortex, input, currentLR)
 
 		// Применяем дофаминовую модуляцию
 		fmt.Println("\nПрименяем дофаминовую модуляцию...")
@@ -62,14 +64,6 @@ func main() {
 		// Консолидация памяти
 		fmt.Println("Консолидация памяти...")
 		consolidateMemory(cortex)
-	}
-
-	// Статистика
-	totalActivations := 0
-	maxActivation := 0.0
-
-	for step := 0; step < 20; step++ {
-		// ... существующий код ...
 
 		// Сбор статистики
 		stepActivations := 0
@@ -85,32 +79,23 @@ func main() {
 		}
 		totalActivations += stepActivations
 
-		fmt.Printf("Шаг %d: активировано %d/%d колонок (макс. активация: %.2f)\n",
-			step, stepActivations, len(cortex.Columns)*len(cortex.Columns[0]), maxActivation)
+		fmt.Printf("Шаг %d: активировано %d/%d колонок (макс. активация: %.2f, LR: %.3f)\n",
+			step, stepActivations, len(cortex.Columns)*len(cortex.Columns[0]), maxActivation, currentLR)
 
 		// Визуализация энергии
-		for _, row := range cortex.Columns {
-			for _, col := range row {
-				energyLevel := int(col.EnergyLevel * 10)
-				fmt.Printf("%d ", energyLevel)
-			}
-			fmt.Println()
-		}
-	}
-
-	fmt.Printf("\nИтого: активаций=%d, средняя=%.1f на шаг\n",
-		totalActivations, float64(totalActivations)/20)
-
-	for step := 0; step < 20; step++ {
-		// ... обработка ...
+		printEnergyGrid(cortex)
 
 		// Каждые 5 шагов добавляем цикл отдыха
 		if step%5 == 4 {
 			fmt.Println("\n=== Цикл отдыха ===")
 			cortex.RestCycle()
 			cortex.UpdateAstrocytes()
+			printEnergyGrid(cortex)
 		}
 	}
+
+	fmt.Printf("\nИтого: активаций=%d, средняя=%.1f на шаг\n",
+		totalActivations, float64(totalActivations)/20)
 }
 
 func printCortexState(c *cortex.Cortex) {
@@ -122,13 +107,23 @@ func printCortexState(c *cortex.Cortex) {
 	}
 }
 
-func applyLearning(c *cortex.Cortex, input [][][]complex128) {
+func printEnergyGrid(c *cortex.Cortex) {
+	fmt.Println("Карта энергии (x10):")
+	for _, row := range c.Columns {
+		for _, col := range row {
+			energyLevel := int(col.EnergyLevel * 10)
+			fmt.Printf("%d ", energyLevel)
+		}
+		fmt.Println()
+	}
+}
+
+func applyLearning(c *cortex.Cortex, input [][][]complex128, learningRate float64) {
 	for i, row := range c.Columns {
 		for j, col := range row {
 			if col.Activated && i < len(input) && j < len(input[i]) {
-				// Убрали создание fullContext - теперь используем только GlobalContext
 				for _, neuron := range col.Neurons {
-					learning.ApplyHebbianLearning(neuron, input[i][j], c.GlobalContext)
+					learning.ApplyHebbianLearning(neuron, input[i][j], c.GlobalContext, learningRate)
 				}
 			}
 		}

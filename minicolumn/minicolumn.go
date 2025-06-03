@@ -93,5 +93,10 @@ func (mc *Minicolumn) ProcessPattern(input []complex128, context []float64) {
 
 func (mc *Minicolumn) Rest() {
 	// Пассивное восстановление энергии
-	mc.EnergyLevel = math.Min(1.0, mc.EnergyLevel+0.1)
+	mc.EnergyLevel = math.Min(1.0, mc.EnergyLevel+0.3)
+
+	// Дополнительное восстановление при наличии астроцита
+	if mc.Astrocyte != nil {
+		mc.EnergyLevel = math.Min(1.0, mc.EnergyLevel+0.2)
+	}
 }
