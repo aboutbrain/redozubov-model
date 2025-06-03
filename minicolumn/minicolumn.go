@@ -36,9 +36,10 @@ func NewMinicolumn(astro types.AstrocyteInterface) *Minicolumn {
 
 // Динамический порог активации
 func (mc *Minicolumn) ActivationThreshold() float64 {
+	// Динамический порог в зависимости от энергии
 	baseThreshold := 0.7
-	energyFactor := 0.3 * (1.0 - mc.EnergyLevel)
-	return baseThreshold + energyFactor
+	energyFactor := 0.2 * (1.0 - mc.EnergyLevel)
+	return math.Max(0.65, math.Min(0.9, baseThreshold+energyFactor))
 }
 
 func (mc *Minicolumn) ProcessPattern(input []complex128, context []float64) {
@@ -92,11 +93,10 @@ func (mc *Minicolumn) ProcessPattern(input []complex128, context []float64) {
 }
 
 func (mc *Minicolumn) Rest() {
-	// Пассивное восстановление энергии
-	mc.EnergyLevel = math.Min(1.0, mc.EnergyLevel+0.3)
-
-	// Дополнительное восстановление при наличии астроцита
+	// Усиленное восстановление с учетом астроцитарной поддержки
+	recovery := 0.4
 	if mc.Astrocyte != nil {
-		mc.EnergyLevel = math.Min(1.0, mc.EnergyLevel+0.2)
+		recovery += 0.3 * mc.Astrocyte.GetCalciumLevel()
 	}
+	mc.EnergyLevel = math.Min(1.0, mc.EnergyLevel+recovery)
 }

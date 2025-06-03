@@ -96,6 +96,30 @@ func main() {
 
 	fmt.Printf("\nИтого: активаций=%d, средняя=%.1f на шаг\n",
 		totalActivations, float64(totalActivations)/20)
+
+	// Уменьшим количество шагов для стабильности
+	totalSteps := 15
+
+	// Добавим разнообразие входных данных
+	var inputs [][][][]complex128
+	for i := 0; i < totalSteps; i++ {
+		inputs = append(inputs, utils.GenerateInputTensor(3, 3))
+	}
+
+	for step := 0; step < totalSteps; step++ {
+		// Используем разные входные данные на каждом шаге
+		cortex.ProcessInput(inputs[step])
+
+		// ... остальной код ...
+
+		// Более частые циклы отдыха
+		if step%3 == 2 {
+			fmt.Println("\n=== Цикл отдыха ===")
+			cortex.RestCycle()
+			cortex.UpdateAstrocytes()
+			printEnergyGrid(cortex)
+		}
+	}
 }
 
 func printCortexState(c *cortex.Cortex) {

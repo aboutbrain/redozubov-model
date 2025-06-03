@@ -21,17 +21,21 @@ func (c *Cortex) LateralInhibition() {
 }
 
 func LateralInhibition(columns [][]*minicolumn.Minicolumn) {
-	for i := range columns {
-		for j := range columns[i] {
-			if columns[i][j].Activated {
-				// Подавляем соседние колонки
+	for i, row := range columns {
+		for j, col := range row {
+			if col.Activated {
+				// Подавление соседей
 				for di := -1; di <= 1; di++ {
 					for dj := -1; dj <= 1; dj++ {
+						if di == 0 && dj == 0 {
+							continue
+						}
 						ni, nj := i+di, j+dj
-						if ni >= 0 && ni < len(columns) &&
-							nj >= 0 && nj < len(columns[0]) &&
-							!(di == 0 && dj == 0) {
-							columns[ni][nj].EnergyLevel *= 0.7
+						if ni >= 0 && ni < len(columns) && nj >= 0 && nj < len(row) {
+							neighbor := columns[ni][nj]
+							// Умеренное подавление
+							neighbor.EnergyLevel *= 0.85
+							neighbor.Activation *= 0.9
 						}
 					}
 				}

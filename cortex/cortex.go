@@ -63,7 +63,9 @@ func (c *Cortex) ProcessInput(input [][][]complex128) {
 			}
 		}
 	}
-	LateralInhibition(c.Columns) // Добавляем торможение
+
+	// Добавляем конкурентное торможение
+	LateralInhibition(c.Columns)
 }
 
 func (c *Cortex) ApplyAttention(focus [][]float64) {
